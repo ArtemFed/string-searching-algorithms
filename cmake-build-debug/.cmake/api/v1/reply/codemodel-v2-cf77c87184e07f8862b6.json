@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/artem/CLionProjects/HW2/cmake-build-debug",
-		"source" : "C:/Users/artem/CLionProjects/HW2"
+		"build" : "C:/Users/artem/CLionProjects/String-searching-algorithms/cmake-build-debug",
+		"source" : "C:/Users/artem/CLionProjects/String-searching-algorithms"
 	},
 	"version" : 
 	{
