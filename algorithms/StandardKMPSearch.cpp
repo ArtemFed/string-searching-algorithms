@@ -1,52 +1,55 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
-void prefix_function(string pattern, vector<int>& pi, size_t &count_of_comparisons) {
-    int n = int(pattern.size());
-    pi.reserve(n);
+void prefix_function(std::string pattern, std::vector<int> &pi) {
+    int m = int(pattern.size());
     pi[0] = 0;
-    for (int i = 1; i < n; i++) {
-        int j = pi[i - 1];
-        while (j > 0 && pattern[i] != pattern[j] && pattern[i] != '?' && pattern[j] != '?') {
-            j = pi[j - 1];
-        }
-        if (pattern[i] == pattern[j] || pattern[i] == '?' || pattern[j] == '?') {
+
+    int j = 0;
+    int i = 1;
+    while (i < m) {
+        if (pattern[i] == pattern[j]) {
+            pi[i] = j;
+            i++;
             j++;
+        } else if (j != 0) {
+            j = pi[j - 1];
+        } else {
+            pi[i] = 0;
+            i++;
         }
-        pi[i] = j;
     }
 }
 
-std::pair<size_t, size_t>standardKMPSearch(string source, string pattern) {
-    size_t answer = 0;
+std::pair<std::vector<int>, size_t> standardKMPSearch(std::string source, std::string pattern) {
+    std::vector<int> result = std::vector<int>();
+
     size_t count_of_comparisons = 0;
 
     int n = int(source.size());
     int m = int(pattern.size());
 
-    if (m > n) {
-        return {answer, count_of_comparisons};
+    if (m == 0 || m > n) {
+        return {result, 0};
     }
 
-    vector<int> pi;
-    prefix_function(pattern, pi, count_of_comparisons);
+    std::vector<int> pi(m, 0);
+    prefix_function(pattern, pi);
 
     int i = 0;
     int j = 0;
     while (i < n) {
         count_of_comparisons++;
-        if (source[i] == pattern[j] || pattern[j] == '?') {
+        if (source[i] == pattern[j]) {
             i++;
             j++;
         }
         if (j == m) {
-            answer++;
+            result.emplace_back(i - j);
             j = pi[j - 1];
         } else {
             count_of_comparisons++;
-            if (i < n && source[i] != pattern[j] && pattern[j] != '?') {
+            if (i < n && source[i] != pattern[j]) {
                 if (j != 0) {
                     j = pi[j - 1];
                 } else {
@@ -55,5 +58,5 @@ std::pair<size_t, size_t>standardKMPSearch(string source, string pattern) {
             }
         }
     }
-    return {answer, count_of_comparisons};
+    return {result, count_of_comparisons};
 }

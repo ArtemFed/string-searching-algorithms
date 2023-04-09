@@ -12,14 +12,14 @@
 #include "Generator.cpp"
 
 #define COUNT_OF_REPETITIONS 5
-#define COUNT_OF_GENERATIONS 5
+#define COUNT_OF_GENERATIONS 2
 #define COUNT_OF_TEXTS 2
-#define COUNT_OF_PATTERNS 2
+#define COUNT_OF_PATTERNS 4
 #define RANDOM_SEED 33
 
-using func = std::pair<size_t, size_t> (*)(const std::string &source, const std::string &pattern);
+using func = std::pair<std::vector<int>, size_t> (*)(const std::string &source, const std::string &pattern);
 
-void testOneSortFile(std::pair<size_t, size_t>(algorithm_func)(const std::string &source, const std::string &pattern)) {
+void testOneSortFile(std::pair<std::vector<int>, size_t>(algorithm_func)(const std::string &source, const std::string &pattern)) {
     auto pair_str_pat = Generator::getStringsFromFile("../files/input.txt");
 
     std::string source = pair_str_pat.first;
@@ -27,7 +27,7 @@ void testOneSortFile(std::pair<size_t, size_t>(algorithm_func)(const std::string
 
     uint64_t sum_of_times = 0;
 
-    std::pair<size_t, size_t> answer;
+    std::pair<std::vector<int>, size_t> answer;
     for (int i = 0; i < COUNT_OF_REPETITIONS; ++i) {
         auto start = std::chrono::high_resolution_clock::now();
         answer = algorithm_func(source, pattern);
@@ -39,11 +39,14 @@ void testOneSortFile(std::pair<size_t, size_t>(algorithm_func)(const std::string
     std::string out_param =
             "Text: " + source + "\n" +
             "Pattern: " + pattern + "\n" +
-            "Answer: " + std::to_string(answer.first) + "\n" +
-            "Comparisons: " + std::to_string(answer.second) + "\n";
+            "Answer size: " + std::to_string(answer.first.size()) + "\n";
+    for (auto item : answer.first) {
+        out_param += std::to_string(item) + ", ";
+    }
+    out_param += "\nComparisons: " + std::to_string(answer.second) + "\n";
     Generator::printStr(out_param, std::cout);
 
-    out_param = std::to_string(answer.first) + " " + std::to_string(answer.second) + "\n";
+    out_param = std::to_string(answer.first.size()) + " " + std::to_string(answer.second) + "\n";
     Generator::printStr(out_param, file);
 
     file.close();
@@ -98,7 +101,7 @@ void testAllAlgorithms(const int current_size,
         std::string source;
 
         // Выбираем вариант генерации Паттерна для поиска в строке
-        for (int mode_pattern = 1; mode_pattern <= COUNT_OF_PATTERNS; ++mode_pattern) {
+        for (int mode_pattern = 0; mode_pattern <= COUNT_OF_PATTERNS; ++mode_pattern) {
             std::string type_pattern;
             std::string pattern;
 
@@ -117,22 +120,21 @@ void testAllAlgorithms(const int current_size,
                     }
 
                     // Получаю паттерн по строке
-                    if (mode_pattern == 1) {
-                        pattern = generator.getSimplePattern(source, pattern_size);
+                    pattern = generator.getSimplePattern(source, pattern_size);
+                    if (mode_pattern == 0) {
                         type_pattern = "simple";
                     } else {
-                        pattern = generator.getAdvancedPattern(source, pattern_size);
-                        type_pattern = "advance";
+                        generator.addSymbolsPattern(source, pattern_size);
+                        type_pattern = "advanced" + std::to_string(mode_pattern);
                     }
 
                     if (distributor.containsKey(func_name)) {
-
                         auto algorithm = distributor.getFunc(func_name);
                         auto pair = algorithm(source, pattern);
-                        size_t answer = pair.first;
-                        size_t countOfOperations = pair.second;
+                        std::vector<int> answer = pair.first;
+                        size_t count_of_operations = pair.second;
 
-                        uint64_t sumOfTimes = 0;
+                        uint64_t sum_of_times = 0;
 
                         for (int j = 0; j < COUNT_OF_REPETITIONS; ++j) {
                             // Вызываю функцию сортировки из map
@@ -140,11 +142,14 @@ void testAllAlgorithms(const int current_size,
                             algorithm(source, pattern);
                             auto diff = std::chrono::high_resolution_clock::now() - start;
 
-                            sumOfTimes += std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
+                            sum_of_times += std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
                         }
+//                        if (func_name == "slow" && type_string == "binary") {
+//                            std::cout << sum_of_times << " || " << (double(sum_of_times) / COUNT_OF_REPETITIONS) / COUNT_OF_GENERATIONS << "\n";
+//                        }
 
-                        map_of_times[func_name][type_pattern][type_string].first += (double(sumOfTimes) / COUNT_OF_REPETITIONS) / COUNT_OF_GENERATIONS;
-                        map_of_times[func_name][type_pattern][type_string].second += double(countOfOperations) / COUNT_OF_GENERATIONS;
+                        map_of_times[func_name][type_pattern][type_string].first += (double(sum_of_times) / COUNT_OF_REPETITIONS) / COUNT_OF_GENERATIONS;
+                        map_of_times[func_name][type_pattern][type_string].second += double(count_of_operations) / COUNT_OF_GENERATIONS;
                     }
                 }
             }

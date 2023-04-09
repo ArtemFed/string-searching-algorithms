@@ -8,53 +8,50 @@
 #include "algorithms/FastKMPSearch.cpp"
 #include "algorithms/BMSearch.cpp"
 #include <algorithm>
-#include <cstdint>
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <ostream>
 #include <string>
-#include <unordered_map>
 
 
-using func = std::pair<size_t, size_t> (*)(const std::string &source, const std::string &pattern);
+using func = std::pair<std::vector<int>, size_t> (*)(const std::string &source, const std::string &pattern);
 
 class Distributor {
-    static std::pair<size_t, size_t> adapterSimpleSearch(const std::string &source, const std::string &pattern) {
-        auto pair = simpleSearch(source, pattern);
-        size_t count_ans = pair.first;
+    static std::pair<std::vector<int>, size_t> adapterSlowSearch(const std::string &source, const std::string &pattern) {
+        auto pair = slowSearch(source, pattern);
+        std::vector<int> answer = pair.first;
         size_t count_comparisons = pair.second;
-        return {count_ans, count_comparisons};
+        return {answer, count_comparisons};
     }
 
-    static std::pair<size_t, size_t> adapterKMPSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterKMPSearch(const std::string &source, const std::string &pattern) {
         auto pair = standardKMPSearch(source, pattern);
-        size_t count_ans = pair.first;
+        std::vector<int> answer = pair.first;
         size_t count_comparisons = pair.second;
-        return {count_ans, count_comparisons};
+        return {answer, count_comparisons};
     }
 
-    static std::pair<size_t, size_t> adapterFastKMPSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterFastKMPSearch(const std::string &source, const std::string &pattern) {
         auto pair = fastKMPSearch(source, pattern);
-        size_t count_ans = pair.first;
+        std::vector<int> answer = pair.first;
         size_t count_comparisons = pair.second;
-        return {count_ans, count_comparisons};
+        return {answer, count_comparisons};
     }
 
-    static std::pair<size_t, size_t> adapterBMSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterBMSearch(const std::string &source, const std::string &pattern) {
         auto pair = BMSearch(source, pattern);
-        size_t count_ans = pair.first;
+        std::vector<int> answer = pair.first;
         size_t count_comparisons = pair.second;
-        return {count_ans, count_comparisons};
+        return {answer, count_comparisons};
     }
 
 
     void initializeMap() {
-        map["slow"] = adapterSimpleSearch;
+        map["slow"] = adapterSlowSearch;
         map["kmp1"] = adapterKMPSearch;
         map["kmp2"] = adapterFastKMPSearch;
-        map["bm"] = adapterBMSearch;
+//        map["bm"] = adapterBMSearch;
 
         func_names = std::vector<std::string>();
         func_names.reserve(map.size());
@@ -78,11 +75,11 @@ public:
         }
     }
 
-    func getFunc(const std::string &key) const {
+    [[nodiscard]] func getFunc(const std::string &key) const {
         return map.at(key);
     }
 
-    bool containsKey(const std::string &key) const {
+    [[nodiscard]] bool containsKey(const std::string &key) const {
         return map.find(key) != map.end();
     }
 
@@ -93,11 +90,11 @@ public:
         return _stream;
     }
 
-    std::vector<std::string> getNames() const {
+    [[nodiscard]] std::vector<std::string> getNames() const {
         return func_names;
     }
 
-    int getSize() const {
+    [[nodiscard]] int getSize() const {
         return int(func_names.size());
     }
 

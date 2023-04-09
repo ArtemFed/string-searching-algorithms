@@ -26,16 +26,11 @@ public:
         return pat;
     }
 
-    std::string getAdvancedPattern(const std::string &str, int target_size) {
-        std::string pat = getSimplePattern(str, target_size);
-
-        int countOfSymbols = 1 + rand() % 4;
-        for (int i = 0; i < countOfSymbols; i++) {
+    void addSymbolsPattern(std::string &pat, int symbols_count) {
+        for (int i = 0; i < symbols_count; i++) {
             int symbolIndex = rand() % pat.size();
             pat[symbolIndex] = '?';
         }
-
-        return pat;
     }
 
 

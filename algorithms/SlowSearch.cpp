@@ -1,25 +1,27 @@
 #include <string>
 
-std::pair<size_t, size_t> simpleSearch(const std::string& source, const std::string& pattern) {
-    int count_ans = 0;
+std::pair<std::vector<int>, size_t> slowSearch(const std::string& source, const std::string& pattern) {
+    int n = int(source.size());
+    int m = int(pattern.size());
+    std::vector<int> result = std::vector<int>();
+
     int count_comparisons = 0;
 
-    for (int i = 0; i < source.length() - pattern.length() + 1; ++i) {
+    for (int i = 0; i < n - m + 1; ++i) {
         int j = 0;
-        int k = i;
-        for (; j < pattern.length() && k < source.length(); ++j, ++k) {
+        for (; j < m && i + j < n; ++j) {
             count_comparisons++;
             if (pattern[j] == '?') {
                 continue;
             }
-            if (source[k] != pattern[j]) {
+            if (source[i + j] != pattern[j]) {
                 break;
             }
         }
-        if (j == pattern.length()) {
-            count_ans++;
+        if (j == m) {
+            result.emplace_back(i);
         }
     }
 
-    return {count_ans, count_comparisons};
+    return {result, count_comparisons};
 }
