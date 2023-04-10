@@ -4,67 +4,47 @@
 
 using namespace std;
 
-// Максимальный размер алфавита (ASCII)
-#define ALPHABET_SIZE 256
+#define NO_OF_CHARS 256
 
-// Функция для вычисления длины максимального суффикса pattern, являющегося суффиксом pattern[0..pos]
-int suffix_len(std::string pattern, int pos) {
-    int len = 0;
-    for (int i = pos, j = pattern.length() - 1; i >= 0 && pattern[i] == pattern[j]; i--, j--) {
-        len++;
+void badCharHeuristic(string str, int size, std::vector<int> badchar) {
+    int i;
+    for (i = 0; i < NO_OF_CHARS; i++) {
+        badchar[i] = -1;
     }
-    return len;
+    for (i = 0; i < size; i++) {
+        badchar[(int) str[i]] = i;
+    }
 }
 
-// Функция для вывода индексов всех вхождений pattern в тексте source
 std::pair<std::vector<int>, size_t> BMSearch(std::string text, std::string pattern) {
-    int text_len = text.length();
-    int pattern_len = pattern.length();
-
     size_t count_of_comparisons = 0;
     std::vector<int> result;
 
-    // Создание таблицы смещений для каждого символа в pattern
-    vector<int> bad_char(ALPHABET_SIZE, pattern_len);
-    for (int i = 0; i < pattern_len - 1; i++) {
-        bad_char[pattern[i]] = pattern_len - i - 1;
-    }
+    int m = pattern.size();
+    int n = text.size();
 
-    // Создание таблицы суффиксов для pattern
-    vector<int> suffix(pattern_len, 0);
-    int last_prefix = pattern_len;
-    for (int i = pattern_len - 1; i >= 0; i--) {
-        if (pattern[i] == pattern[last_prefix - 1]) {
-            last_prefix = i;
-        }
-        suffix[pattern_len - i - 1] = last_prefix - i + pattern_len - 1;
-    }
-    for (int i = 0, j = 1; i < pattern_len - 1; i++, j++) {
-        int len = suffix_len(pattern, i);
-        suffix[len] = pattern_len - j + len;
-    }
+    std::vector<int> badchar(NO_OF_CHARS);
 
-    // Поиск вхождений pattern в text
-    int i = pattern_len - 1;
-    while (i < text_len) {
-        int j = pattern_len - 1;
-        while (j >= 0 && text[i] == pattern[j]) {
-            i--;
+    badCharHeuristic(pattern, m, badchar);
+
+    int s = 0;
+    while (s <= (n - m)) {
+        int j = m - 1;
+        while (j >= 0 && pattern[j] == text[s + j]) {
             j--;
         }
+
         if (j < 0) {
-            result.emplace_back(i);
-            i += pattern_len - suffix[0];
-        }
-        else {
-            i += max(bad_char[(int)text[i]], suffix[pattern_len - j - 1]);
+            result.emplace_back(s);
+            s += (s + m < n) ? m - badchar[text[s + m]] : 1;
+        } else {
+            s += max(1, j - badchar[text[s + j]]);
         }
     }
     return {result, count_of_comparisons};
 }
 
-
-std::pair<std::vector<int>, size_t> BM1Search(std::string text, std::string pattern) {
+std::pair<std::vector<int>, size_t> BM2Search(std::string text, std::string pattern) {
     int n = int(text.size());
     int m = int(pattern.size());
     size_t count_of_comparisons = 0;
@@ -74,23 +54,56 @@ std::pair<std::vector<int>, size_t> BM1Search(std::string text, std::string patt
         return {result, 0};
     }
 
-    int i = m - 1, j = m - 1;
+    // Инициализация таблицы несоответствия
+    vector<int> bad_char(256, m);
+    for (int i = 0; i < m - 1; i++) {
+        bad_char[pattern[i]] = m - i - 1;
+    }
+
+    // Вычисление таблицы суффиксов
+    vector<int> suffix(m + 1), good_suffix(m + 1);
+    suffix[m] = m + 1;
+    int j = m + 1;
+    for (int i = m; i >= 0; i--) {
+        if (i == 0 || suffix[i] == i + 1) {
+            while (j <= m && pattern[j - 1] != pattern[i - 1]) {
+                count_of_comparisons++;
+                if (good_suffix[j] == 0) {
+                    good_suffix[j] = j - i;
+                }
+                j = suffix[j];
+            }
+            suffix[i] = j--;
+        }
+    }
+
+    // Заполнение оставшихся ячеек таблицы суффиксов
+    j = suffix[0];
+    for (int i = 0; i <= m; i++) {
+        if (good_suffix[i] == 0) {
+            good_suffix[i] = j;
+        }
+        if (i == j) {
+            j = suffix[j];
+        }
+    }
+
+    // Поиск подстроки
+    int i = m - 1;
+    j = m - 1;
     while (i < n) {
-        if (text[i] == pattern[j] || pattern[j] == '?') {
+        count_of_comparisons++;
+        if (pattern[j] == text[i]) {
             if (j == 0) {
                 result.push_back(i);
-                i += m - std::min(j, 1 + j);
+                i++;
                 j = m - 1;
             } else {
-                --i;
-                --j;
+                i--;
+                j--;
             }
         } else {
-            int k = i;
-            while (k < n && text[k] != pattern[j] && pattern[j] != '?') {
-                k += m - std::min(j, 1 + j - k);
-            }
-            i = k;
+            i += max(good_suffix[j], bad_char[text[i]]);
             j = m - 1;
         }
     }

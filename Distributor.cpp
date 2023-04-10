@@ -3,10 +3,11 @@
 // Clion для C++ и VS Code для python (.ipynb)
 // Сделано: всё
 
+#include "algorithms/BMSearch.cpp"
+#include "algorithms/FastKMPSearch.cpp"
+#include "algorithms/RKSearch.cpp"
 #include "algorithms/SlowSearch.cpp"
 #include "algorithms/StandardKMPSearch.cpp"
-#include "algorithms/FastKMPSearch.cpp"
-#include "algorithms/BMSearch.cpp"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -46,12 +47,20 @@ class Distributor {
         return {answer, count_comparisons};
     }
 
+    static std::pair<std::vector<int>, size_t> adapterRKSearch(const std::string &source, const std::string &pattern) {
+        auto pair = RKSearch(source, pattern);
+        std::vector<int> answer = pair.first;
+        size_t count_comparisons = pair.second;
+        return {answer, count_comparisons};
+    }
+
 
     void initializeMap() {
         map["slow"] = adapterSlowSearch;
         map["kmp1"] = adapterKMPSearch;
         map["kmp2"] = adapterFastKMPSearch;
-//        map["bm"] = adapterBMSearch;
+        //        map["bm"] = adapterBMSearch; Не работает...
+        map["rk"] = adapterRKSearch;
 
         func_names = std::vector<std::string>();
         func_names.reserve(map.size());
@@ -109,7 +118,7 @@ public:
                 // Получаем пару { название типа генерации текста, vector с различными замерами }
                 for (auto &text_type_item : pattern_type_item.second) {
                     file_name = func_item.first + "_" + text_type_item.first + "_" + pattern_type_item.first + "_" + std::to_string(num);
-                    std::cout << file_name << "\n";
+                    //                    std::cout << file_name << "\n";
 
                     std::ofstream file{path + file_name + ".csv"};
                     file << "text-size;pat-size;time;comparisons\n";

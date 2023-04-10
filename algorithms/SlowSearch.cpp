@@ -5,15 +5,16 @@ std::pair<std::vector<int>, size_t> slowSearch(const std::string& source, const 
     int m = int(pattern.size());
     std::vector<int> result = std::vector<int>();
 
-    int count_comparisons = 0;
+    int count_of_comparisons = 0;
 
     for (int i = 0; i < n - m + 1; ++i) {
         int j = 0;
         for (; j < m && i + j < n; ++j) {
-            count_comparisons++;
+            count_of_comparisons++;
             if (pattern[j] == '?') {
                 continue;
             }
+            count_of_comparisons++;
             if (source[i + j] != pattern[j]) {
                 break;
             }
@@ -23,5 +24,5 @@ std::pair<std::vector<int>, size_t> slowSearch(const std::string& source, const 
         }
     }
 
-    return {result, count_comparisons};
+    return {result, count_of_comparisons};
 }

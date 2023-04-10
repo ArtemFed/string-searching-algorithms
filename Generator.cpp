@@ -15,21 +15,53 @@
  */
 class Generator {
     const int random_seed;
+    int start_index;
 
 public:
     explicit Generator(int seed) : random_seed(seed) {
+        start_index = rand() % 6001;
     }
 
     std::string getSimplePattern(const std::string &str, int target_size) {
-        int index = rand() % (str.size() - target_size);
+        int index = start_index % (int(str.size()) - target_size);
         std::string pat = str.substr(index, target_size);
         return pat;
     }
 
+
+    std::vector<std::string> patts;
+    std::vector<int> indexes;
+
+    void addGeneratedPattern(const std::string &pat, const std::vector<char> &alphabet, int index) {
+        if (index >= indexes.size()) {
+            patts.emplace_back(pat);
+            return;
+        }
+        for (char symb : alphabet) {
+            std::string new_pat = pat;
+            new_pat[indexes[index]] = symb;
+            addGeneratedPattern(new_pat, alphabet, index + 1);
+        }
+    }
+
+    std::vector<std::string> insertAllSymbolsPattern(const std::string &pat, const std::vector<char> &alphabet) {
+        patts = std::vector<std::string>();
+        indexes = std::vector<int>();
+
+        char ch = '?';
+        int pos = -1;
+        while ((pos = int(pat.find(ch, pos + 1))) != string::npos) {
+            indexes.emplace_back(pos);
+        }
+
+        addGeneratedPattern(pat, alphabet, 0);
+        return patts;
+    }
+
     void addSymbolsPattern(std::string &pat, int symbols_count) {
         for (int i = 0; i < symbols_count; i++) {
-            int symbolIndex = rand() % pat.size();
-            pat[symbolIndex] = '?';
+            int symbol_index = rand() % pat.size();
+            pat[symbol_index] = '?';
         }
     }
 
