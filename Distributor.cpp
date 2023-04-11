@@ -1,7 +1,6 @@
-// АиСД-2, 2023, задание 5
+// АиСД-2, 2023, КДЗ-2
 // Федоров Артём Олегович БПИ217
-// Clion для C++ и VS Code для python (.ipynb)
-// Сделано: всё
+// Windows: Clion для C++ и VS Code для python (.ipynb)
 
 #include "algorithms/BMSearch.cpp"
 #include "algorithms/FastKMPSearch.cpp"
@@ -10,48 +9,37 @@
 #include "algorithms/StandardKMPSearch.cpp"
 #include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <ostream>
 #include <string>
 
 
-using func = std::pair<std::vector<int>, size_t> (*)(const std::string &source, const std::string &pattern);
+using func = std::pair<std::vector<int>, size_t> (*)(const std::string &source, std::string &pattern);
 
 class Distributor {
-    static std::pair<std::vector<int>, size_t> adapterSlowSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterSlowSearch(const std::string &source, std::string &pattern) {
         auto pair = slowSearch(source, pattern);
-        std::vector<int> answer = pair.first;
-        size_t count_comparisons = pair.second;
-        return {answer, count_comparisons};
+        return {pair.first, pair.second};
     }
 
-    static std::pair<std::vector<int>, size_t> adapterKMPSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterKMPSearch(const std::string &source, std::string &pattern) {
         auto pair = standardKMPSearch(source, pattern);
-        std::vector<int> answer = pair.first;
-        size_t count_comparisons = pair.second;
-        return {answer, count_comparisons};
+        return {pair.first, pair.second};
     }
 
-    static std::pair<std::vector<int>, size_t> adapterFastKMPSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterFastKMPSearch(const std::string &source, std::string &pattern) {
         auto pair = fastKMPSearch(source, pattern);
-        std::vector<int> answer = pair.first;
-        size_t count_comparisons = pair.second;
-        return {answer, count_comparisons};
+        return {pair.first, pair.second};
     }
 
-    static std::pair<std::vector<int>, size_t> adapterBMSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterBMSearch(const std::string &source, std::string &pattern) {
         auto pair = BMSearch(source, pattern);
-        std::vector<int> answer = pair.first;
-        size_t count_comparisons = pair.second;
-        return {answer, count_comparisons};
+        return {pair.first, pair.second};
     }
 
-    static std::pair<std::vector<int>, size_t> adapterRKSearch(const std::string &source, const std::string &pattern) {
+    static std::pair<std::vector<int>, size_t> adapterRKSearch(const std::string &source, std::string &pattern) {
         auto pair = RKSearch(source, pattern);
-        std::vector<int> answer = pair.first;
-        size_t count_comparisons = pair.second;
-        return {answer, count_comparisons};
+        return {pair.first, pair.second};
     }
 
 
@@ -59,7 +47,7 @@ class Distributor {
         map["slow"] = adapterSlowSearch;
         map["kmp1"] = adapterKMPSearch;
         map["kmp2"] = adapterFastKMPSearch;
-        //        map["bm"] = adapterBMSearch; Не работает...
+        map["bm"] = adapterBMSearch;
         map["rk"] = adapterRKSearch;
 
         func_names = std::vector<std::string>();

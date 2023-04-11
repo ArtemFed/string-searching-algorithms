@@ -1,57 +1,47 @@
 #include <string>
 #include <vector>
 
-void prefix_function(std::string pattern, std::vector<int> &pi, size_t &count_of_comparisons) {
-    int m = int(pattern.size());
+std::pair<std::vector<int>, size_t> standardKMPSearch(const std::string &source, const std::string &pattern) {
+    std::vector<int> result = std::vector<int>();
+    size_t count_of_comparisons = 0;
 
-    pi[0] = 0;
-    for (int i = 1; i < m; i++) {
-        int j = pi[i - 1];
+    int n = int(source.length());
+    int m = int(pattern.length());
+
+    if (m == 0 || m > n) {
+        return {result, 0};
+    }
+
+    std::vector<int> br(m);
+
+    br[0] = 0;
+    for (int i = 1, j = 0; i < m; i++) {
+        count_of_comparisons++;
         while (j > 0 && pattern[i] != pattern[j]) {
             count_of_comparisons++;
-            j = pi[j - 1];
+            j = br[j - 1];
         }
         count_of_comparisons++;
         if (pattern[i] == pattern[j]) {
             j++;
         }
-        pi[i] = j;
+        br[i] = j;
     }
-}
 
-std::pair<std::vector<int>, size_t> standardKMPSearch(std::string source, std::string pattern) {
-    std::vector<int> result = std::vector<int>();
-    size_t count_of_comparisons = 0;
-    int n = int(source.size());
-    int m = int(pattern.size());
-
-    if (m == 0 || m > n) {
-        return {result, 0};
-    }
-    std::vector<int> pi(m);
-    prefix_function(pattern, pi, count_of_comparisons);
-
-    int i = 0;
-    int j = 0;
-    while (i < n) {
+    for (int i = 0, j = 0; i < n; i++) {
+        count_of_comparisons++;
+        while (j > 0 && source[i] != pattern[j]) {
+            count_of_comparisons++;
+            j = br[j - 1];
+        }
         count_of_comparisons++;
         if (source[i] == pattern[j]) {
-            i++;
             j++;
         }
         if (j == m) {
-            result.emplace_back(i - j);
-            j = pi[j - 1];
-        } else {
-            count_of_comparisons++;
-            if (i < n && source[i] != pattern[j]) {
-                if (j != 0) {
-                    j = pi[j - 1];
-                } else {
-                    i++;
-                }
-            }
+            result.emplace_back(i - m + 1);
         }
     }
+
     return {result, count_of_comparisons};
 }

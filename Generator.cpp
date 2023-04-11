@@ -1,7 +1,6 @@
-// АиСД-2, 2023, задание 5
+// АиСД-2, 2023, КДЗ-2
 // Федоров Артём Олегович БПИ217
-// Clion для C++ и VS Code для python (.ipynb)
-// Сделано: всё
+// Windows: Clion для C++ и VS Code для python (.ipynb)
 
 #include <cstdlib>
 #include <ctime>
@@ -16,13 +15,21 @@
 class Generator {
     const int random_seed;
     int start_index;
+    std::vector<int> symbs_index;
+
 
 public:
     explicit Generator(int seed) : random_seed(seed) {
         start_index = rand() % 6001;
+        while (symbs_index.size() < 5) {
+            int index = rand() % 100;
+            if (std::find(symbs_index.begin(), symbs_index.end(), index) == symbs_index.end()) {
+                symbs_index.emplace_back(index);
+            }
+        }
     }
 
-    std::string getSimplePattern(const std::string &str, int target_size) {
+    [[nodiscard]] std::string getSimplePattern(const std::string &str, int target_size) const {
         int index = start_index % (int(str.size()) - target_size);
         std::string pat = str.substr(index, target_size);
         return pat;
@@ -37,9 +44,9 @@ public:
             patts.emplace_back(pat);
             return;
         }
-        for (char symb : alphabet) {
+        for (char symbol : alphabet) {
             std::string new_pat = pat;
-            new_pat[indexes[index]] = symb;
+            new_pat[indexes[index]] = symbol;
             addGeneratedPattern(new_pat, alphabet, index + 1);
         }
     }
@@ -50,7 +57,7 @@ public:
 
         char ch = '?';
         int pos = -1;
-        while ((pos = int(pat.find(ch, pos + 1))) != string::npos) {
+        while ((pos = int(pat.find(ch, pos + 1))) != std::string::npos) {
             indexes.emplace_back(pos);
         }
 
@@ -60,8 +67,7 @@ public:
 
     void addSymbolsPattern(std::string &pat, int symbols_count) {
         for (int i = 0; i < symbols_count; i++) {
-            int symbol_index = rand() % pat.size();
-            pat[symbol_index] = '?';
+            pat[symbs_index[symbols_count]] = '?';
         }
     }
 
@@ -71,7 +77,7 @@ public:
      * @param str_size Размер строки
      * @param alphabet Алфавит
      */
-    std::string getRandomText(int str_size, const std::vector<char> &alphabet) const {
+    [[nodiscard]] std::string getRandomText(int str_size, const std::vector<char> &alphabet) const {
         std::string str;
         int alphabet_size = int(alphabet.size());
         srand(random_seed);

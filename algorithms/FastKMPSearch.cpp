@@ -1,8 +1,7 @@
 #include <string>
 #include <vector>
 
-
-std::pair<std::vector<int>, size_t> fastKMPSearch(std::string source, std::string pattern) {
+std::pair<std::vector<int>, size_t> fastKMPSearch(const std::string &source, std::string &pattern) {
     std::vector<int> result = std::vector<int>();
     size_t count_of_comparisons = 0;
 
@@ -13,25 +12,41 @@ std::pair<std::vector<int>, size_t> fastKMPSearch(std::string source, std::strin
         return {result, 0};
     }
 
-    std::vector<int> pi(m);
+    std::vector<int> br(m);
 
-    pi[0] = 0;
+    br[0] = 0;
     for (int i = 1, j = 0; i < m; i++) {
+        count_of_comparisons++;
         while (j > 0 && pattern[i] != pattern[j]) {
             count_of_comparisons++;
-            j = pi[j - 1];
+            j = br[j - 1];
         }
         count_of_comparisons++;
         if (pattern[i] == pattern[j]) {
             j++;
         }
-        pi[i] = j;
+        br[i] = j;
     }
 
+    std::vector<int> brs(m);
+    brs[0] = 0;
+    brs[1] = 0;
+    pattern += '#';
+    for (int i = 2; i < m + 1; ++i) {
+        count_of_comparisons++;
+        if (pattern[br[i - 1]] == pattern[i]) {
+            brs[i - 1] = br[i - 1];
+        } else {
+            brs[i - 1] = brs[br[i - 1]];
+        }
+    }
+    pattern.pop_back();
+
     for (int i = 0, j = 0; i < n; i++) {
+        count_of_comparisons++;
         while (j > 0 && source[i] != pattern[j]) {
             count_of_comparisons++;
-            j = pi[j - 1];
+            j = br[j - 1];
         }
         count_of_comparisons++;
         if (source[i] == pattern[j]) {
@@ -39,7 +54,6 @@ std::pair<std::vector<int>, size_t> fastKMPSearch(std::string source, std::strin
         }
         if (j == m) {
             result.emplace_back(i - m + 1);
-            j = pi[j - 1];
         }
     }
 
