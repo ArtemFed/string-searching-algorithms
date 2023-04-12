@@ -1,2 +1,7 @@
-# String-searching-algorithms
+# String-searching-algorithms 
+## КДЗ-2 Выполнил Федоров Артём Олегович БПИ217
  
+#### Структура:
+1. ./algorithms/ - содержит файлы с функциями-алгоритмами
+2. Generator.cpp - класс для генерации строк
+3. ./graphs.ipynb - содержит все графики и выводы
