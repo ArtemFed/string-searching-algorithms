@@ -47,7 +47,7 @@ class Distributor {
         map["slow"] = adapterSlowSearch;
         map["kmp1"] = adapterKMPSearch;
         map["kmp2"] = adapterFastKMPSearch;
-        map["bm"] = adapterBMSearch;
+        map["zbm"] = adapterBMSearch;
         map["rk"] = adapterRKSearch;
 
         func_names = std::vector<std::string>();

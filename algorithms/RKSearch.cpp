@@ -2,7 +2,7 @@
 #include <vector>
 
 // Размер алфавита
-#define ALPHABET_SIZE 256
+#define ALPHABET_SIZE_RK 256
 
 std::pair<std::vector<int>, size_t> RKSearch(const std::string &source, const std::string &pattern) {
     int n = int(source.size());
@@ -20,13 +20,13 @@ std::pair<std::vector<int>, size_t> RKSearch(const std::string &source, const st
     int h = 1;
     int prime = 9883;// простое число для хеширования
     for (int i = 0; i < m; i++) {
-        pat_hash = (ALPHABET_SIZE * pat_hash + pattern[i]) % prime;
-        src_hash = (ALPHABET_SIZE * src_hash + source[i]) % prime;
+        pat_hash = (ALPHABET_SIZE_RK * pat_hash + pattern[i]) % prime;
+        src_hash = (ALPHABET_SIZE_RK * src_hash + source[i]) % prime;
     }
 
     // Вычисляем h = ALPHABET_SIZE^(m-1)
     for (int i = 0; i < m - 1; i++) {
-        h = (h * ALPHABET_SIZE) % prime;
+        h = (h * ALPHABET_SIZE_RK) % prime;
     }
 
     // Перебираем все окна в тексте
@@ -50,7 +50,7 @@ std::pair<std::vector<int>, size_t> RKSearch(const std::string &source, const st
 
         // Вычисляем хеш следующего окна
         if (i < n - m) {
-            src_hash = (ALPHABET_SIZE * (src_hash - source[i] * h) + source[i + m]) % prime;
+            src_hash = (ALPHABET_SIZE_RK * (src_hash - source[i] * h) + source[i + m]) % prime;
             if (src_hash < 0) {
                 src_hash = (src_hash + prime);
             }

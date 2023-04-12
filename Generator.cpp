@@ -107,6 +107,32 @@ public:
         }
     }
 
+    static std::string readFile(const std::string& file_path) {
+        std::ifstream file(file_path, std::ios::binary);
+
+        if (!file) {
+            std::cerr << "Failed to open file: " << file_path << std::endl;
+            return "";
+        }
+
+        // Получаем размер файла
+        file.seekg(0, std::ios::end);
+        std::streampos file_size = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        // Выделяем достаточно памяти для чтения файла
+        std::string content;
+        content.resize(static_cast<std::size_t>(file_size));
+
+        // Чтение файла в память
+        if (!file.read(&content[0], file_size)) {
+            std::cerr << "Failed to read file: " << file_path << std::endl;
+            return "";
+        }
+
+        return content;
+    }
+
     /**
      * Напечатать строку в поток
      * @param str Строка
