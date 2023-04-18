@@ -63,8 +63,9 @@ void callAllFuncsOnMyTest() {
     std::map<std::string, std::ofstream> outStreams{};
 
     std::string filepath = "..\\files/Tolstoy Leo. War and Peace.txt";
-    std::string pattern = "Pierre";
+    std::string pattern = "War";
 
+    std::cout << "pattern = " << pattern << "\n";
     testAllAlgorithmsOnMyTest(filepath,
                               pattern,
                               vec_of_func_names,
